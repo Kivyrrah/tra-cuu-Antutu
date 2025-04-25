@@ -6,7 +6,7 @@ from tkinter import Tk, Label, Entry, Button, StringVar, OptionMenu
 from tkinter import ttk
 
 def info_finder(url, soc_ver):
-    scraper = cloudscraper.create_scraper()  # giống requests nhưng bypass cloudflare
+    scraper = cloudscraper.create_scraper() 
 
     try:
         r = scraper.get(url)
@@ -31,7 +31,6 @@ def info_finder(url, soc_ver):
         return f"Lỗi: {str(e)}"
 
 def compare_results(results):
-    # Sắp xếp danh sách kết quả theo điểm GPU từ cao đến thấp
     results_sorted = sorted(results, key=lambda x: float(x["GPU"]), reverse=True)
 
     max_values = {
@@ -54,7 +53,7 @@ def compare_results(results):
 
 def main():
     for i in tree.get_children():
-        tree.delete(i)  # Xóa các kết quả cũ
+        tree.delete(i) 
 
     results = []
 
@@ -64,7 +63,6 @@ def main():
         value = entry_choice[i].get()
         soc_ver = entry_soc_ver[i].get().strip()
 
-        # Chuyển đổi chuỗi: thay dấu cách bằng dấu '-' và chuyển thành chữ thường
         formatted_soc_ver = soc_ver.replace(' +', '-plus').replace('888', '875').replace('+', '-plus').replace(' ', '-').lower()
 
         if value == "Dimensity":
@@ -89,7 +87,7 @@ def main():
             tree.insert("", "end", values=("Tùy chọn không hợp lệ.", "", "", "", "", ""))
             return
 
-        url = url0 + formatted_soc_ver  # Sử dụng chuỗi đã được định dạng
+        url = url0 + formatted_soc_ver 
         result = info_finder(url, formatted_soc_ver)
         if isinstance(result, dict):
             results.append(result)
@@ -103,43 +101,35 @@ def add_fields():
     for i in range(n):
         Label(left_frame, text=f"Mời nhập tên của SoC thứ {i+1}:").grid(row=2+i*3, column=0, sticky='w', padx=5, pady=5)
         choice_var = StringVar(left_frame)
-        choice_var.set("Snapdragon")  # Default value
+        choice_var.set("Snapdragon")  
         entry_choice.append(choice_var)
         OptionMenu(left_frame, choice_var, "Dimensity", "Exynos", "Snapdragon", "Apple", "Unisoc", "Unisoc Tiger", "Tensor", "Kirin", "Helio").grid(row=2+i*3, column=1, padx=5, pady=5)
         entry_soc_ver.append(Entry(left_frame))
         entry_soc_ver[-1].grid(row=3+i*3, column=1, padx=5, pady=5)
 
-    # Show the "Nhập lại" and "Tra cứu" buttons at the bottom of the results table
     reset_button.grid(row=1, column=0, padx=5, pady=5, sticky='e')
     search_button.grid(row=1, column=1, padx=5, pady=5, sticky='e')
 
 def reset_fields():
-    # Xóa tất cả các hàng trong treeview (kết quả tra cứu cũ)
     for i in tree.get_children():
         tree.delete(i)
 
-    # Xóa các trường nhập liệu và lựa chọn SoC hiện tại
     for widget in left_frame.winfo_children():
-        widget.grid_forget()  # Ẩn tất cả các widget trong left_frame
+        widget.grid_forget() 
 
-    # Hiện lại trường nhập số lượng SoC và nút "Xác nhận"
     Label(left_frame, text="Bạn cần tra cứu bao nhiêu SoC?").grid(row=0, column=0, sticky='w', padx=5, pady=5)
     entry_num.grid(row=0, column=1, padx=5, pady=5)
     confirm_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
 
-    # Ẩn nút "Nhập lại" và "Tra cứu"
     reset_button.grid_forget()
     search_button.grid_forget()
 
-    # Xóa danh sách lựa chọn SoC và phiên bản SoC để chuẩn bị cho lần nhập mới
     entry_choice.clear()
     entry_soc_ver.clear()
 
-# Initialize Tkinter
 root = Tk()
 root.title("Tra cứu điểm Antutu của SoC di động và so sánh")
 
-# Left column
 left_frame = ttk.Frame(root)
 left_frame.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
@@ -150,11 +140,9 @@ entry_num.grid(row=0, column=1, padx=5, pady=5)
 confirm_button = Button(left_frame, text="Xác nhận", command=add_fields)
 confirm_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
 
-# Initialize global variables
 entry_choice = []
 entry_soc_ver = []
 
-# Right column
 right_frame = ttk.Frame(root)
 right_frame.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
@@ -166,7 +154,6 @@ tree.heading("Mem", text="Mem")
 tree.heading("UX", text="UX")
 tree.heading("Total", text="Total")
 
-# Set column widths and make columns resizable
 tree.column("SoC", width=150, stretch=True)
 tree.column("CPU", width=100, stretch=True)
 tree.column("GPU", width=100, stretch=True)
@@ -176,20 +163,16 @@ tree.column("Total", width=100, stretch=True)
 
 tree.grid(row=0, column=0, columnspan=2, sticky='nsew')
 
-# Place buttons below the Treeview
 reset_button = Button(right_frame, text="Nhập lại toàn bộ", command=reset_fields)
 search_button = Button(right_frame, text="Tra cứu", command=main, bg='red', fg='white')
 
-# Use grid to place buttons below the Treeview
 reset_button.grid(row=1, column=0, padx=5, pady=5, sticky='e')
 search_button.grid(row=1, column=1, padx=5, pady=5, sticky='e')
 
-# Make the columns and rows resizable
 right_frame.grid_rowconfigure(0, weight=1)
 right_frame.grid_columnconfigure(0, weight=1)
 right_frame.grid_columnconfigure(1, weight=1)
 
-# Make the left_frame resizable
 left_frame.grid_rowconfigure(2, weight=1)
 left_frame.grid_columnconfigure(1, weight=1)
 
